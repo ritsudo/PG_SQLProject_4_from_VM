@@ -1,5 +1,5 @@
 #!/bin/bash
-PSQL="psql -X --username=freecodecamp --dbname=periodic_table --typles-only -c"
+PSQL="psql -X --username=freecodecamp --dbname=periodic_table --tuples-only -c"
 
 if [[ -z $1 ]]
   then
@@ -18,8 +18,31 @@ if [[ -z $1 ]]
     RESULT_ELEMENT_BOILINT_POINT=0
 
     #check if $1 = digit else, get ID
-    #check is $1 = 2 letters (Li), get ID else
-    #check if $1 = Word (Lithium), get ID
+    if [[ ! $1 =~ ^[0-9]+$ ]]
+    then
+      #try symbol
+      SYMBOL_SEARCH_RESULT=$($PSQL "SELECT atomic_number FROM elements WHERE symbol='$1';")
+      if [[ -z $SYMBOL_SEARCH_RESULT ]]
+      then 
+        FULL_SEARCH_RESULT=$($PSQL "SELECT atomic_number FROM elements WHERE name='$1';")
+        if [[ -z $FULL_SEARCH_RESULT ]]
+        then 
+          echo "I could not find that element in the database."
+        else
+          ELEMENT_FOUND=$FULL_SEARCH_RESULT
+        fi
+      else
+        ELEMENT_FOUND=$SYMBOL_SEARCH_RESULT
+      fi
+    else
+      DIGIT_SEARCH_RESULT=$($PSQL "SELECT atomic_number FROM elements WHERE atomic_number=$1;")
+      if [[ -z $DIGIT_SEARCH_RESULT ]]
+      then
+        echo "I could not find that element in the database."
+      else 
+        ELEMENT_FOUND=$DIGIT_SEARCH_RESULT
+      fi
+    fi
 
     #if element found
     if [[ $ELEMENT_FOUND != 0 ]]
@@ -28,7 +51,5 @@ if [[ -z $1 ]]
 
       #show element details
       echo "The element with atomic number $RESULT_ELEMENT_NUMBER is $RESULT_ELEMENT_NAME_FULL ($RESULT_ELEMENT_NAME_SHORT). It's a $RESULT_ELEMENT_TYPE, with a mass of $RESULT_ELEMENT_MASS amu. $RESULT_ELEMENT_NAME_FULL has a melting point of $RESULT_ELEMENT_MELTING_POINT celsius and a boiling point of $RESULT_ELEMENT_BOILINT_POINT celsius."
-    else
-      echo "I could not find that element in the database."
     fi
 fi
