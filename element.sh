@@ -48,6 +48,14 @@ if [[ -z $1 ]]
     if [[ $ELEMENT_FOUND != 0 ]]
     then
       #update element details
+          RESULT_ELEMENT_NUMBER=$(echo $ELEMENT_FOUND | sed 's/ |/"/')
+          RESULT_ELEMENT_NAME_FULL=$(echo $($PSQL "SELECT name FROM elements WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_NAME_SHORT=$(echo $($PSQL "SELECT symbol FROM elements WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_TYPE_ID=$(echo $($PSQL "SELECT type_id FROM properties WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_TYPE=$(echo $($PSQL "SELECT type FROM types WHERE type_id=$RESULT_ELEMENT_TYPE_ID;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_MASS=$(echo $($PSQL "SELECT atomic_mass FROM properties WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_MELTING_POINT=$(echo $($PSQL "SELECT melting_point_celsius FROM properties WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
+          RESULT_ELEMENT_BOILINT_POINT=$(echo $($PSQL "SELECT boiling_point_celsius FROM properties WHERE atomic_number=$ELEMENT_FOUND;") | sed 's/ |/"/' )
 
       #show element details
       echo "The element with atomic number $RESULT_ELEMENT_NUMBER is $RESULT_ELEMENT_NAME_FULL ($RESULT_ELEMENT_NAME_SHORT). It's a $RESULT_ELEMENT_TYPE, with a mass of $RESULT_ELEMENT_MASS amu. $RESULT_ELEMENT_NAME_FULL has a melting point of $RESULT_ELEMENT_MELTING_POINT celsius and a boiling point of $RESULT_ELEMENT_BOILINT_POINT celsius."
